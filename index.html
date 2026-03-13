@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<title>1on1統計ページ</title>
+<style>
+/* -------------------------------------------------- */
+/* 1. 基本要素のスタイル */
+/* -------------------------------------------------- */
+body {
+  background: black;
+  color: white;
+  font-family: 'VT323', monospace;
+  text-align: center;
+  padding: 15px;
+  font-size: 20px;
+}
+
+h1 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 28px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+p {
+  margin: 6px 0;
+}
+
+button {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  padding: 8px 20px;
+  margin: 8px;
+  background: black;
+  color: white;
+  border: 3px solid white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: white;
+  color: black;
+}
+
+input {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  padding: 8px;
+  border: 3px solid white;
+  background: black;
+  color: white;
+  width: 220px;
+  text-align: center;
+}
+
+/* -------------------------------------------------- */
+/* 2. 共通クラスのスタイル */
+/* -------------------------------------------------- */
+.screen {
+  display: none;
+  max-width: 680px; 
+  margin: auto;
+  border: 4px solid white;
+  padding: 20px;
+  background: black;
+  box-shadow: 0 0 0 4px black, 0 0 0 8px white;
+}
+
+.active {
+  display: block;
+}
+
+.selected {
+  background: #00FF00;
+  color: black;
+}
+
+/* -------------------------------------------------- */
+/* 3. レイアウト関連のスタイル */
+/* -------------------------------------------------- */
+/* ID入力横並び */
+.idRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* 進捗バー */
+.progressBox {
+  width: 320px;
+  margin: 10px auto 20px auto;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 18px;
+  border: 3px solid white;
+}
+
+/* グラフ表示 */
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.resultRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 0px;
+}
+
+.bar {
+  width: 480px;
+  height: 18px;
+  border: 3px solid white;
+  margin: 4px auto 6px auto;
+  display: flex;
+  overflow: hidden;
+}
+
+/* -------------------------------------------------- */
+/* 4. 特定の要素のスタイル */
+/* -------------------------------------------------- */
+#progressFill {
+  height: 100%;
+  background: #00FF00;
+  width: 0%;
+  transition: width .4s;
+}
+
+#progressText {
+  width: 40px;
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.green {
+  background: #00FF00;
+  height: 100%;
+  transition: width .5s;
+}
+
+.dark {
+  background: #004400;
+  height: 100%;
+  transition: width .5s;
+}
+
+.leftLabel {
+  width: 160px;
+  text-align: right;
+  font-size: 16px;
+}
+
+.rightLabel {
+  width: 160px;
+  text-align: left;
+  font-size: 16px;
+}
+
+/* screen2,3,4の選択肢ボタン */
+.choiceRow {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.choiceRow button {
+  flex: 1;
+  min-width: 180px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+/* -------------------------------------------------- */
+/* 5. 管理者ページ関連のスタイル */
+/* -------------------------------------------------- */
+#screen6 p {
+  margin: 4px 0;
+}
+
+#screen6 button {
+  margin: 4px;
+}
+
+.adminRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.adminRow span {
+  width: 50px;
+  text-align: right;
+}
+
+.adminChoiceRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.adminChoiceRow span {
+  width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.adminChoiceRow button {
+  font-size: 15px;
+  padding: 5px 10px;
+  flex-grow: 1;
+  min-width: unset;
+}
+
+/* 職種グラフの最後の項目（jobE）の下にマージンを追加 */
+#jobEResultRow {
+  margin-bottom: 15px;
+}
+
+/* -------------------------------------------------- */
+/* 6. その他 (通知メッセージ) */
+/* -------------------------------------------------- */
+.notice {
+  position: absolute;
+  bottom: 10px;
+  left: 15px;
+  font-size: 12px;
+  text-align: left;
+  opacity: 0.75;
+  line-height: 1.3;
+  max-width: 420px;
+}
+
+</style>
+</head>
+<body>
+
+<div id="screen1" class="screen active">
+<h1>1on1統計ページ</h1>
+<!-- 進捗バー -->
+<div class="progressBox">
+<div class="progressRow">
+<div class="progressBar">
+<div id="progressFill"></div>
+</div>
+<div id="progressText">0%</div>
+</div>
+</div>
+<!-- ID入力横並び -->
+<div class="idRow">
+<span>ID入力</span>
+<input id="userID" placeholder="例:user001">
+<button onclick="nextScreen(2)">次へ</button>
+</div>
+<br>
+<button onclick="nextScreen(6)">管理者用</button>
+<button onclick="showResult()">結果確認</button>
+</div>
+<div class="notice">
+アンケートへのご協力ありがとうございます。<br>
+本ページは FirebaseのRealtime Database を利用して作成されています。<br>
+回答データは管理番号のみで記録されており、氏名などの個人情報は一切記録しておりません。<br>
+</div>
+
+<div id="screen2" class="screen">
+<h1>休日はどちらの過ごし方が多いですか？</h1>
+<div class="choiceRow">
+<button onclick="setQ1('AA')">A<br>インドア</button>
+<button onclick="setQ1('BB')">B<br>アウトドア</button>
+</div>
+</div>
+
+<div id="screen3" class="screen">
+<h1>仕事の付き合いでは、<br>どちらに近いですか？</h1>
+<div class="choiceRow">
+<button onclick="setQ2('CC')">A<br>仕事の成果・<br>実績を重視する</button>
+<button onclick="setQ2('DD')">B<br>会話や飲み会などで<br>親しくなりたい</button>
+</div>
+</div>
+
+<div id="screen4" class="screen">
+<h1>どちらのタイプに近いですか？</h1>
+<div class="choiceRow">
+<button onclick="vote('A')">A<br>常に挑戦<br>していたい</button>
+<button onclick="vote('B')">B<br>誰かを支える<br>役割が好き</button>
+</div>
+</div>
+
+<!-- 結果 -->
+<div id="screen5" class="screen">
+<h1>ー結果ー</h1>
+<div class="titleRow">
+<h2>男女比</h2>
+<span id="genderTotal">[n=0]</span>
+</div>
+<div class="resultRow">
+<div class="leftLabel">男性 <span id="maleRate">0</span>%</div>
+<div class="bar">
+<div id="maleBar" class="green"></div>
+<div id="femaleBar" class="dark"></div>
+</div>
+<div class="rightLabel">女性 <span id="femaleRate">0</span>%</div>
+</div>
+
+<div class="titleRow">
+<h2>職種</h2>
+<span id="jobTotal">[n=0]</span>
+</div>
+<div class="resultRow">
+<div class="leftLabel">経営・統括 <span id="jobARate">0</span>%</div>
+<div class="bar"><div id="jobABar" class="green"></div></div>
+</div>
+<div class="resultRow">
+<div class="leftLabel">リサーチ・分析 <span id="jobBRate">0</span>%</div>
+<div class="bar"><div id="jobBBar" class="green"></div></div>
+</div>
+<div class="resultRow" id="jobCResultRow">
+<div class="leftLabel">営業 <span id="jobCRate">0</span>%</div>
+<div class="bar"><div id="jobCBar" class="green"></div></div>
+</div>
+<div class="resultRow">
+<div class="leftLabel">技術開発 <span id="jobDRate">0</span>%</div>
+<div class="bar"><div id="jobDBar" class="green"></div></div>
+</div>
+<div class="resultRow" id="jobEResultRow">
+<div class="leftLabel">コーポレート・管理 <span id="jobERate">0</span>%</div>
+<div class="bar"><div id="jobEBar" class="green"></div></div>
+</div>
+
+<div class="titleRow">
+<h2>【休日の過ごし方は？】</h2>
+<span id="Q1Total">[n=0]</span>
+</div>
+<div class="resultRow">
+<div class="leftLabel">インドア <span id="AARate">0</span>%</div>
+<div class="bar">
+<div id="AABar" class="green"></div>
+<div id="BBBar" class="dark"></div>
+</div>
+<div class="rightLabel">アウトドア <span id="BBRate">0</span>%</div>
+</div>
+<div class="titleRow">
+<h2>【仕事の付き合いは？】</h2>
+<span id="Q2Total">[n=0]</span>
+</div>
+<div class="resultRow">
+<div class="leftLabel">成果・実績重視 <span id="CCRate">0</span>%</div>
+<div class="bar">
+<div id="CCBar" class="green"></div>
+<div id="DDBar" class="dark"></div>
+</div>
+<div class="rightLabel">会話や交流重視 <span id="DDRate">0</span>%</div>
+</div>
+<div class="titleRow">
+<h2> 【自分はどちら？】</h2>
+<span id="animalTotal">[n=0]</span>
+</div>
+<div class="resultRow">
+<div class="leftLabel">挑戦したい <span id="dogRate">0</span>%</div>
+<div class="bar">
+<div id="dogBar" class="green"></div>
+<div id="catBar" class="dark"></div>
+</div>
+<div class="rightLabel">支える役割が好き <span id="catRate">0</span>%</div>
+</div>
+<br>
+<button onclick="goTop()">トップへ戻る</button>
+</div>
+
+<!-- 管理 -->
+<div id="screen6" class="screen">
+<h1>管理者入力</h1>
+<div class="adminRow">
+  <span>ID</span>
+  <input id="adminID">
+</div>
+<div class="adminRow">
+  <span>性別</span>
+  <button id="maleBtn" onclick="setAdminGender('male')">男性</button>
+  <button id="femaleBtn" onclick="setAdminGender('female')">女性</button>
+</div>
+<div class="adminChoiceRow">
+  <span>職種</span>
+  <button id="jobABtn" onclick="setJob('A')">経営・統括</button>
+  <button id="jobBBtn" onclick="setJob('B')">リサーチ・分析</button>
+  <button id="jobCBtn" onclick="setJob('C')">営業</button>
+  <button id="jobDBtn" onclick="setJob('D')">技術開発</button>
+  <button id="jobEBtn" onclick="setJob('E')">コーポレート・管理</button>
+</div>
+<div class="adminChoiceRow">
+  <span>年数</span>
+  <button id="year1Btn" onclick="setYear('Y1')">3年未満</button>
+  <button id="year2Btn" onclick="setYear('Y2')">3-5年未満</button>
+  <button id="year3Btn" onclick="setYear('Y3')">5-10年未満</button>
+  <button id="year4Btn" onclick="setYear('Y4')">10年以上</button>
+</div>
+<br><br>
+<button onclick="saveAdmin()">保存</button>
+<br>
+<button onclick="goTop()">ホームへ戻る</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, update, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig={
+apiKey:"AIzaSy...",
+authDomain:"n50test.firebaseapp.com",
+databaseURL:"https://n50test-default-rtdb.firebaseio.com",
+projectId:"n50test"
+};
+
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+let Q1="";
+let Q2="";
+let adminGender="";
+let job="";
+let year = ""; // year変数の初期化を追加
+
+window.nextScreen=num=>{
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById("screen"+num).classList.add("active");
+if(num===6){
+document.getElementById("adminID").value=
+document.getElementById("userID").value;
+}
+};
+window.showResult=()=>nextScreen(5);
+window.goTop=()=>nextScreen(1);
+
+window.setQ1=v=>{Q1=v;nextScreen(3);}
+window.setQ2=v=>{Q2=v;nextScreen(4);}
+
+window.vote=async choice=>{
+const id=document.getElementById("userID").value.trim();
+if(!id){
+alert("ID入力してください");
+return;
+}
+const voteRef=ref(db,"votes/"+id);
+const snap=await get(voteRef);
+if(snap.exists()&&snap.val().choice){
+alert("このIDは既に登録済みです");
+goTop();
+return;
+}
+await update(voteRef,{
+Q1:Q1,
+Q2:Q2,
+choice:choice
+});
+nextScreen(5);
+};
+
+window.setAdminGender=g=>{
+adminGender=g;
+document.getElementById("maleBtn").classList.remove("selected");
+document.getElementById("femaleBtn").classList.remove("selected");
+if(g==="male"){
+document.getElementById("maleBtn").classList.add("selected");
+}else{
+document.getElementById("femaleBtn").classList.add("selected");
+}
+};
+
+window.setJob=j=>{
+job=j;
+document.getElementById("jobABtn").classList.remove("selected");
+document.getElementById("jobBBtn").classList.remove("selected");
+document.getElementById("jobCBtn").classList.remove("selected");
+document.getElementById("jobDBtn").classList.remove("selected");
+document.getElementById("jobEBtn").classList.remove("selected");
+
+document.getElementById("job"+j+"Btn").classList.add("selected");
+};
+
+window.setYear=y=>{
+year=y;
+document.getElementById("year1Btn").classList.remove("selected");
+document.getElementById("year2Btn").classList.remove("selected");
+document.getElementById("year3Btn").classList.remove("selected");
+document.getElementById("year4Btn").classList.remove("selected");
+document.getElementById("year"+y.slice(1)+"Btn").classList.add("selected");
+};
+
+
+window.saveAdmin=async()=>{
+const id=document.getElementById("adminID").value.trim();
+if(!adminGender||!job||!year){
+alert("性別、職種、年数を選択してください");
+return;
+}
+await update(ref(db,"votes/"+id),{
+gender:adminGender,
+job:job,
+year:year
+});
+alert("保存しました");
+goTop();
+};
+
+onValue(ref(db,"votes"),snap=>{
+const data=snap.val();
+if(!data)return;
+
+/* 進捗バー */
+let choiceIdCount = 0;
+for (let k in data) {
+    if (data[k].choice) {
+        choiceIdCount++;
+    }
+}
+const percent = Math.min((choiceIdCount / 50) * 100, 100);
+document.getElementById("progressFill").style.width = percent + "%";
+document.getElementById("progressText").textContent =
+Math.round(percent) + "%";
+
+
+let AA=0,BB=0,CC=0,DD=0,dog=0,cat=0;
+let male=0,female=0;
+let jobA=0,jobB=0,jobC=0,jobD=0,jobE=0;
+
+for(let k in data){
+const d=data[k];
+if(d.Q1==="AA")AA++;
+if(d.Q1==="BB")BB++;
+if(d.Q2==="CC")CC++;
+if(d.Q2==="DD")DD++;
+if(d.choice==="A")dog++;
+if(d.choice==="B")cat++;
+if(d.gender==="male")male++;
+if(d.gender==="female")female++;
+if(d.job==="A")jobA++;
+if(d.job==="B")jobB++;
+if(d.job==="C")jobC++;
+if(d.job==="D")jobD++;
+if(d.job==="E")jobE++;
+}
+
+const Q1Total=AA+BB;
+const Q2Total=CC+DD;
+const animalTotal=dog+cat;
+const genderTotal=male+female;
+const jobTotal=jobA+jobB+jobC+jobD+jobE;
+
+const AARate=Math.round(AA/Q1Total*100)||0;
+const BBRate=Math.round(BB/Q1Total*100)||0;
+const CCRate=Math.round(CC/Q2Total*100)||0;
+const DDRate=Math.round(DD/Q2Total*100)||0;
+const dogRate=Math.round(dog/animalTotal*100)||0;
+const catRate=Math.round(cat/animalTotal*100)||0;
+const maleRate=Math.round(male/genderTotal*100)||0;
+const femaleRate=Math.round(female/genderTotal*100)||0;
+const jobARate=Math.round(jobA/jobTotal*100)||0;
+const jobBRate=Math.round(jobB/jobTotal*100)||0;
+const jobCRate=Math.round(jobC/jobTotal*100)||0;
+const jobDRate=Math.round(jobD/jobTotal*100)||0;
+const jobERate=Math.round(jobE/jobTotal*100)||0;
+
+function setBar(id,val){
+const el=document.getElementById(id);
+if(el)el.style.width=val+"%";
+}
+
+setBar("AABar",AARate);
+setBar("BBBar",BBRate);
+setBar("CCBar",CCRate);
+setBar("DDBar",DDRate);
+setBar("dogBar",dogRate);
+setBar("catBar",catRate);
+setBar("maleBar",maleRate);
+setBar("femaleBar",femaleRate);
+setBar("jobABar",jobARate);
+setBar("jobBBar",jobBRate);
+setBar("jobCBar",jobCRate);
+setBar("jobDBar",jobDRate);
+setBar("jobEBar",jobERate);
+
+function setText(id,val){
+const el=document.getElementById(id);
+if(el)el.textContent=val;
+}
+
+setText("AARate",AARate);
+setText("BBRate",BBRate);
+setText("CCRate",CCRate);
+setText("DDRate",DDRate);
+setText("dogRate",dogRate);
+setText("catRate",catRate);
+setText("maleRate",maleRate);
+setText("femaleRate",femaleRate);
+setText("jobARate",jobARate);
+setText("jobBRate",jobBRate);
+setText("jobCRate",jobCRate);
+setText("jobDRate",jobDRate);
+setText("jobERate",jobERate);
+
+setText("Q1Total","[n="+Q1Total+"]");
+setText("Q2Total","[n="+Q2Total+"]");
+setText("animalTotal","[n="+animalTotal+"]");
+setText("genderTotal","[n="+genderTotal+"]");
+setText("jobTotal","[n="+jobTotal+"]");
+});
+
+</script>
+</body>
+</html>
