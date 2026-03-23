@@ -113,7 +113,8 @@ input {
   margin-bottom: 0px;
 }
 .bar {
-  width: 480px;
+  /* 左右のラベル幅を広げた分、バーの幅を調整 */
+  width: 440px; /* 以前の 480px から調整 */
   height: 18px;
   border: 3px solid white;
   margin: 4px auto 6px auto;
@@ -145,12 +146,14 @@ input {
   transition: width .5s;
 }
 .leftLabel {
-  width: 160px;
+  /* ラベルの幅を広げ、2桁のパーセンテージも収まるように調整 */
+  width: 190px; /* 以前の 160px から調整 */
   text-align: right;
   font-size: 16px;
 }
 .rightLabel {
-  width: 160px;
+  /* ラベルの幅を広げ、2桁のパーセンテージも収まるように調整 */
+  width: 190px; /* 以前の 160px から調整 */
   text-align: left;
   font-size: 16px;
 }
@@ -194,7 +197,7 @@ input {
   justify-content: center;
   gap: 8px;
   margin-top: 10px;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* ボタンが多い場合に折り返す */
 }
 .adminChoiceRow span {
   width: 50px;
@@ -207,6 +210,7 @@ input {
   flex-grow: 1;
   min-width: unset;
 }
+/* 職種グラフの最後の項目（jobF）の下にマージンを追加 */
 #jobFResultRow {
   margin-bottom: 15px;
 }
@@ -300,8 +304,7 @@ input {
 <div class="leftLabel">リサーチ・分析 <span id="jobBRate">0</span>%</div>
 <div class="bar"><div id="jobBBar" class="green"></div></div>
 </div>
-<!-- 新しい職種Fの項目を追加 -->
-<div class="resultRow" id="jobFResultRow">
+<div class="resultRow">
 <div class="leftLabel">実査・オペレーション <span id="jobFRate">0</span>%</div>
 <div class="bar"><div id="jobFBar" class="green"></div></div>
 </div>
@@ -377,6 +380,7 @@ input {
   <button id="jobCBtn" onclick="setJob('C')">営業</button>
   <button id="jobDBtn" onclick="setJob('D')">技術開発</button>
   <button id="jobEBtn" onclick="setJob('E')">コーポレート・管理</button>
+
 </div>
 <div class="adminChoiceRow">
   <span>年数</span>
@@ -395,10 +399,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, update, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig={
-apiKey:"AIzaSy...",
-authDomain:"n50test.firebaseapp.com",
-databaseURL:"https://n50test-default-rtdb.firebaseio.com",
-projectId:"n50test"
+  apiKey:"AIzaSy...", // あなたのFirebase設定に置き換えてください
+  authDomain:"n50test.firebaseapp.com", // あなたのFirebase設定に置き換えてください
+  databaseURL:"https://n50test-default-rtdb.firebaseio.com", // あなたのFirebase設定に置き換えてください
+  projectId:"n50test" // あなたのFirebase設定に置き換えてください
 };
 
 const app=initializeApp(firebaseConfig);
@@ -466,7 +470,7 @@ window.setJob=j=>{
   document.getElementById("jobCBtn").classList.remove("selected");
   document.getElementById("jobDBtn").classList.remove("selected");
   document.getElementById("jobEBtn").classList.remove("selected");
-  document.getElementById("jobFBtn").classList.remove("selected"); // jobFBtnを追加
+  document.getElementById("jobFBtn").classList.remove("selected");
   document.getElementById("job"+j+"Btn").classList.add("selected");
 };
 
@@ -481,7 +485,7 @@ window.setYear=y=>{
 
 window.saveAdmin=async()=>{
   const id=document.getElementById("adminID").value.trim();
-  if(!id){ // IDが空の場合のチェックを追加
+  if(!id){
       alert("IDを入力してください");
       return;
   }
@@ -517,7 +521,7 @@ onValue(ref(db,"votes"),snap=>{
 
   let AA=0,BB=0,CC=0,DD=0,dog=0,cat=0;
   let male=0,female=0;
-  let jobA=0,jobB=0,jobC=0,jobD=0,jobE=0,jobF=0; // jobFを追加
+  let jobA=0,jobB=0,jobC=0,jobD=0,jobE=0,jobF=0;
 
   for(let k in data){
     const d=data[k];
@@ -534,7 +538,7 @@ onValue(ref(db,"votes"),snap=>{
     if(d.job==="C")jobC++;
     if(d.job==="D")jobD++;
     if(d.job==="E")jobE++;
-    if(d.job==="F")jobF++; 
+    if(d.job==="F")jobF++;
   }
 
   const Q1Total=AA+BB;
@@ -556,7 +560,7 @@ onValue(ref(db,"votes"),snap=>{
   const jobCRate=Math.round(jobC/jobTotal*100)||0;
   const jobDRate=Math.round(jobD/jobTotal*100)||0;
   const jobERate=Math.round(jobE/jobTotal*100)||0;
-  const jobFRate=Math.round(jobF/jobTotal*100)||0; 
+  const jobFRate=Math.round(jobF/jobTotal*100)||0;
 
   function setBar(id,val){
     const el=document.getElementById(id);
@@ -596,7 +600,7 @@ onValue(ref(db,"votes"),snap=>{
   setText("jobCRate",jobCRate);
   setText("jobDRate",jobDRate);
   setText("jobERate",jobERate);
-  setText("jobFRate",jobFRate); 
+  setText("jobFRate",jobFRate);
 
   setText("Q1Total","[n="+Q1Total+"]");
   setText("Q2Total","[n="+Q2Total+"]");
